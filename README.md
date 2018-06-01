@@ -14,6 +14,8 @@ npm start
 ```sh
 npm build
 ```
+_There are no other repositories which you have to clone for this project to work, just clone this project then run ```npm install``` and then ```npm start``` to run the development server._
+
 ---
 #### _Three Stage Course Material Project - Restaurant Reviews_
 

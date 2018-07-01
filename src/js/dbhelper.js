@@ -13,6 +13,8 @@ function getIdbPromise() {
 
 const idbPromise = getIdbPromise();
 
+const dbWorker = new Worker('/js/dbWorker.js');
+
 /**
  * Common database helper functions.
  */
@@ -39,14 +41,7 @@ export default class DBHelper {
     xhr.open('GET', DBHelper.DATABASE_URL);
     xhr.onload = () => {
       if (xhr.status === 200) { // Got a success response from server!
-        const restaurants = JSON.parse(xhr.responseText);
-
-        if (restaurants) {
-          restaurants.forEach(restaurant =>
-            idbPromise.then(db =>
-              db.transaction('restaurant-data', 'readwrite').objectStore('restaurant-data').put(restaurant))
-          );
-        }
+        dbWorker.postMessage({ type: 'updateIDB', responseText: xhr.responseText });
       } else { // Oops!. Got an error from server.
         const error = (`Request failed. Returned status of ${xhr.status}`);
         callback(error, null);
@@ -64,12 +59,18 @@ export default class DBHelper {
       if (error) {
         callback(error, null);
       } else {
-        const restaurant = restaurants.find(r => r.id == id);
-        if (restaurant) { // Got the restaurant
-          callback(null, restaurant);
-        } else { // Restaurant does not exist in the database
-          callback('Restaurant does not exist', null);
-        }
+        dbWorker.postMessage({ type: 'filterByID', restaurants: restaurants, id: id });
+
+        dbWorker.addEventListener('message', function (event) {
+          const message = event.data;
+          if (message.type == 'filterByID') {
+            if (message.restaurant) { // Got the restaurant
+              callback(null, message.restaurant);
+            } else { // Restaurant does not exist in the database
+              callback('Restaurant does not exist', null);
+            }
+          }
+        });
       }
     });
   }
@@ -83,9 +84,14 @@ export default class DBHelper {
       if (error) {
         callback(error, null);
       } else {
-        // Filter restaurants to have only given cuisine type
-        const results = restaurants.filter(r => r.cuisine_type == cuisine);
-        callback(null, results);
+        dbWorker.postMessage({ type: 'filterByCuisine', restaurants: restaurants, cuisine: cuisine });
+
+        dbWorker.addEventListener('message', function (event) {
+          const message = event.data;
+          if (message.type == 'filterByCuisine') {
+            callback(null, message.cuisines);
+          }
+        });
       }
     });
   }
@@ -99,9 +105,14 @@ export default class DBHelper {
       if (error) {
         callback(error, null);
       } else {
-        // Filter restaurants to have only given neighborhood
-        const results = restaurants.filter(r => r.neighborhood == neighborhood);
-        callback(null, results);
+        dbWorker.postMessage({ type: 'filterByNeighborhood', restaurants: restaurants, neighborhood: neighborhood });
+
+        dbWorker.addEventListener('message', function (event) {
+          const message = event.data;
+          if (message.type == 'filterByNeighborhood') {
+            callback(null, message.neighborhoods);
+          }
+        });
       }
     });
   }
@@ -115,14 +126,19 @@ export default class DBHelper {
       if (error) {
         callback(error, null);
       } else {
-        let results = restaurants
-        if (cuisine != 'all') { // filter by cuisine
-          results = results.filter(r => r.cuisine_type == cuisine);
-        }
-        if (neighborhood != 'all') { // filter by neighborhood
-          results = results.filter(r => r.neighborhood == neighborhood);
-        }
-        callback(null, results);
+        dbWorker.postMessage({
+          type: 'filterByCuisineAndNeighborhood',
+          restaurants: restaurants,
+          cuisine: cuisine,
+          neighborhood: neighborhood
+        });
+
+        dbWorker.addEventListener('message', function (event) {
+          const message = event.data;
+          if (message.type == 'filterByCuisineAndNeighborhood') {
+            callback(null, message.restaurants);
+          }
+        });
       }
     });
   }
@@ -136,11 +152,14 @@ export default class DBHelper {
       if (error) {
         callback(error, null);
       } else {
-        // Get all neighborhoods from all restaurants
-        const neighborhoods = restaurants.map((v, i) => restaurants[i].neighborhood)
-        // Remove duplicates from neighborhoods
-        const uniqueNeighborhoods = neighborhoods.filter((v, i) => neighborhoods.indexOf(v) == i)
-        callback(null, uniqueNeighborhoods);
+        dbWorker.postMessage({ type: 'fetchNeighborhoods', restaurants: restaurants });
+
+        dbWorker.addEventListener('message', function (event) {
+          const message = event.data;
+          if (message.type == 'fetchNeighborhoods') {
+            callback(null, message.neighborhoods);
+          }
+        });
       }
     });
   }
@@ -154,11 +173,14 @@ export default class DBHelper {
       if (error) {
         callback(error, null);
       } else {
-        // Get all cuisines from all restaurants
-        const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type)
-        // Remove duplicates from cuisines
-        const uniqueCuisines = cuisines.filter((v, i) => cuisines.indexOf(v) == i)
-        callback(null, uniqueCuisines);
+        dbWorker.postMessage({ type: 'fetchCuisines', restaurants: restaurants });
+
+        dbWorker.addEventListener('message', function (event) {
+          const message = event.data;
+          if (message.type == 'fetchCuisines') {
+            callback(null, message.cuisines);
+          }
+        });
       }
     });
   }

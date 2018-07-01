@@ -153,11 +153,19 @@ gulp.task('main', () =>
     })
 );
 
-// main.js - restaurant_info script
+// restaurant_info.js - restaurant_info script
 gulp.task('restaurant_info', () =>
     bundleJS({
         entry: 'src/js/restaurant_info.js',
         ouput: 'dist/js/restaurant_info.js'
+    })
+);
+
+// dbWorker.js - database worker script
+gulp.task('dbWorker', () =>
+    bundleJS({
+        entry: 'src/js/dbWorker.js',
+        ouput: 'dist/js/dbWorker.js'
     })
 );
 
@@ -170,7 +178,7 @@ gulp.task('sw', () =>
 );
 
 // buld js files
-gulp.task('js', ['main', 'restaurant_info', 'sw']);
+gulp.task('js', ['main', 'restaurant_info', 'sw', 'dbWorker']);
 
 // watch js files
 gulp.task('js:watch', () =>

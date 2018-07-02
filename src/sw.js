@@ -16,7 +16,8 @@ self.addEventListener('install', event => event.waitUntil(
             '/restaurant.html',
             'css/styles.css',
             'js/main.js',
-            'js/restaurant_info.js'
+            'js/restaurant_info.js',
+            'js/dbWorker.js'
         ]))
 ));
 

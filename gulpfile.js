@@ -11,6 +11,7 @@ const buffer = require('vinyl-buffer');         // makes it easier to work with 
 const uglify = require('gulp-uglify');          // minifies js code
 const sourcemaps = require('gulp-sourcemaps');  // generates source maps
 const browserSync = require('browser-sync').create();   // development server
+const compression = require('compression');     // compression middleware (for serving gzipped files with browser-sync)
 const del = require('del');                     // deletes a file or folder
 const size = require('gulp-size');              // displays the size of the project
 const rename = require('gulp-rename');          // renames a file
@@ -222,7 +223,8 @@ gulp.task('browser-sync', () =>
         server: {
             baseDir: 'dist'
         },
-        port: 8000
+        port: 8000,
+        middleware: [compression()]
     })
 );
 

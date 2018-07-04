@@ -5,7 +5,7 @@ import idb from './idb';
   */
 function getIdbPromise() {
   if (!navigator.serviceWorker) {
-    return Promise.resolve();
+    return Promise.reject();
   }
 
   return idb.open('restaurant-reviews', 1, upgradeDb => upgradeDb.createObjectStore('restaurant-data', { keyPath: 'id' }));
@@ -207,8 +207,7 @@ export default class DBHelper {
       position: restaurant.latlng,
       title: restaurant.name,
       url: DBHelper.urlForRestaurant(restaurant),
-      map: map,
-      animation: google.maps.Animation.DROP
+      map: map
     });
     self.didMapChange = true;
     return marker;

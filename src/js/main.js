@@ -1,29 +1,16 @@
 import DBHelper from './dbhelper.js';
-import 'intersection-observer';
+import lazyImageObserver from './lazyImageObserver.js';
 
-let restaurants;
-let neighborhoods;
-let cuisines;
-let map;
+self.restaurants;
+self.neighborhoods;
+self.cuisines;
+self.map;
 self.markers = [];
 
-let lazyImageObserver;
+const cuisinesSelect = document.getElementById('cuisines-select')
+const neighborhoodsSelect = document.getElementById('neighborhoods-select');
 
-/**
- * Lazy load offscreen images
- */
-if ("IntersectionObserver" in window) {
-  lazyImageObserver = new IntersectionObserver(function (entries, observer) {
-    entries.forEach(function (entry) {
-      if (entry.isIntersecting) {
-        let lazyImage = entry.target;
-        lazyImage.src = lazyImage.dataset.src;
-        lazyImage.srcset = lazyImage.dataset.srcset;
-        lazyImageObserver.unobserve(lazyImage);
-      }
-    });
-  });
-}
+const restaurantsList = document.getElementById('restaurants-list');
 
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
@@ -101,36 +88,63 @@ function fillCuisinesHTML(cuisines = self.cuisines) {
   });
 }
 
+let isMapInitialized = false;
+
+const mapElement = document.getElementById('map');
+mapElement.addEventListener('click', function wakeMap() {
+  if (!isMapInitialized) {
+    initMap();
+  }
+  mapElement.removeEventListener('click', wakeMap, false);
+});
+
 /**
  * Initialize Google map, called from HTML.
  */
 window.initMap = function () {
+  isMapInitialized = true;
+
   let loc = {
     lat: 40.722216,
     lng: -73.987501
   };
-  self.map = new google.maps.Map(document.getElementById('map'), {
+
+  self.map = new google.maps.Map(mapElement, {
     zoom: 12,
     center: loc,
     scrollwheel: false,
     mapTypeControl: false,
     streetViewControl: false
   });
-  updateRestaurants();
+
+  // Add the markers to the map
+  addMarkersToMap(self.restaurants);
+}
+
+updateRestaurants();
+
+// If the user has a good internet connection
+if (
+  navigator.connection &&
+  navigator.connection.effectiveType &&
+  !['3g', '2g', 'slow-2g'].includes(navigator.connection.effectiveType)) {
+  // Initialized the map
+  window.addEventListener('load', initMap);
 }
 
 /**
  * Update page and map for current restaurants.
  */
 function updateRestaurants() {
-  const cSelect = document.getElementById('cuisines-select');
-  const nSelect = document.getElementById('neighborhoods-select');
+  const cIndex = cuisinesSelect.selectedIndex;
+  const nIndex = neighborhoodsSelect.selectedIndex;
 
-  const cIndex = cSelect.selectedIndex;
-  const nIndex = nSelect.selectedIndex;
+  const cuisine = cuisinesSelect[cIndex].value;
+  const neighborhood = neighborhoodsSelect[nIndex].value;
 
-  const cuisine = cSelect[cIndex].value;
-  const neighborhood = nSelect[nIndex].value;
+  if (!isMapInitialized && (cuisine != 'all' || neighborhood != 'all')) {
+    initMap();
+  }
 
   DBHelper.fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, (error, restaurants) => {
     if (error) { // Got an error!
@@ -142,8 +156,8 @@ function updateRestaurants() {
   })
 }
 
-document.getElementById('cuisines-select').addEventListener('change', updateRestaurants);
-document.getElementById('neighborhoods-select').addEventListener('change', updateRestaurants);
+cuisinesSelect.addEventListener('change', updateRestaurants);
+neighborhoodsSelect.addEventListener('change', updateRestaurants);
 
 /**
  * Clear current restaurants, their HTML and remove their map markers.
@@ -151,8 +165,7 @@ document.getElementById('neighborhoods-select').addEventListener('change', updat
 function resetRestaurants(restaurants) {
   // Remove all restaurants
   self.restaurants = [];
-  const ul = document.getElementById('restaurants-list');
-  ul.innerHTML = '';
+  restaurantsList.innerHTML = '';
 
   // Remove all map markers
   self.markers.forEach(m => m.setMap(null));
@@ -164,8 +177,7 @@ function resetRestaurants(restaurants) {
  * Create all restaurants HTML and add them to the webpage.
  */
 function fillRestaurantsHTML(restaurants = self.restaurants) {
-  const ul = document.getElementById('restaurants-list');
-  restaurants.forEach(restaurant => ul.appendChild(createRestaurantHTML(restaurant)));
+  restaurants.forEach(restaurant => restaurantsList.appendChild(createRestaurantHTML(restaurant)));
   addMarkersToMap();
 }
 
@@ -200,8 +212,9 @@ function createRestaurantHTML(restaurant) {
 
   image.alt = `A view from the restaurant ${restaurant.name}`;
 
-  if (lazyImageObserver)
+  if (lazyImageObserver) {
     lazyImageObserver.observe(image);
+  }
 
   li.appendChild(image);
 
@@ -231,6 +244,10 @@ function createRestaurantHTML(restaurant) {
  * Add markers for current restaurants to the map.
  */
 function addMarkersToMap(restaurants = self.restaurants) {
+  if (!isMapInitialized) {
+    return;
+  }
+
   restaurants.forEach(restaurant => {
     // Add marker to the map
     const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.map);

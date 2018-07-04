@@ -1,27 +1,54 @@
 import DBHelper from './dbhelper.js';
+import lazyImageObserver from './lazyImageObserver.js';
 
-let restaurant;
-var map;
+self.restaurant;
+self.map;
+
+
+fetchRestaurantFromURL((error, restaurant) => {
+  if (error) { // Got an error!
+    console.error(error);
+  } else {
+    self.restaurant = restaurant;
+    fillBreadcrumb();
+  }
+});
+
+let isMapInitialized;
+
+const mapElement = document.getElementById('map');
+
+mapElement.addEventListener('click', function wakeMap() {
+  if (!isMapInitialized) {
+    initMap();
+  }
+  mapElement.removeEventListener('click', wakeMap, false);
+});
 
 /**
  * Initialize Google map, called from HTML.
  */
 window.initMap = () => {
-  fetchRestaurantFromURL((error, restaurant) => {
-    if (error) { // Got an error!
-      console.error(error);
-    } else {
-      self.map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 16,
-        center: restaurant.latlng,
-        scrollwheel: false,
-        mapTypeControl: false,
-        streetViewControl: false
-      });
-      fillBreadcrumb();
-      DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
-    }
+  isMapInitialized = true;
+
+  self.map = new google.maps.Map(mapElement, {
+    zoom: 16,
+    center: self.restaurant.latlng,
+    scrollwheel: false,
+    mapTypeControl: false,
+    streetViewControl: false
   });
+
+  DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
+}
+
+// If the user has a good internet connection
+if (
+  navigator.connection &&
+  navigator.connection.effectiveType &&
+  !['3g', '2g', 'slow-2g'].includes(navigator.connection.effectiveType)) {
+  // Initialized the map
+  window.addEventListener('load', initMap);
 }
 
 /**
@@ -60,14 +87,16 @@ function fillRestaurantHTML(restaurant = self.restaurant) {
   address.innerHTML = '<em>address: </em>' + restaurant.address;
 
   const image = document.getElementById('restaurant-img');
-  image.className = 'restaurant-img'
+  image.classList.add('restaurant-img');
+  image.classList.add('lazy');
 
   const imageUrl = DBHelper.imageUrlForRestaurant(restaurant);
-  image.src = imageUrl;
+  image.dataset.src = imageUrl;
+  image.src = `img/placeholder.svg`;
 
   const imagePath = imageUrl.substring(0, imageUrl.lastIndexOf('.'));
   const imageType = imageUrl.substring(imageUrl.lastIndexOf('.'), imageUrl.length);
-  image.srcset =
+  image.dataset.srcset =
     `${imagePath}-300w${imageType} 300w,` +
     `${imagePath}-550w${imageType} 550w,` +
     `${imageUrl} 800w`;
@@ -75,6 +104,10 @@ function fillRestaurantHTML(restaurant = self.restaurant) {
   image.sizes = '(min-width: 1024px) 50vw, 100vw';
 
   image.alt = `A view from the restaurant ${restaurant.name}`;
+
+  if (lazyImageObserver) {
+    lazyImageObserver.observe(image);
+  }
 
   const cuisine = document.getElementById('restaurant-cuisine');
   cuisine.innerHTML = restaurant.cuisine_type;
@@ -91,10 +124,11 @@ function fillRestaurantHTML(restaurant = self.restaurant) {
  * Create restaurant operating hours HTML table and add it to the webpage.
  */
 function fillRestaurantHoursHTML(operatingHours = self.restaurant.operating_hours) {
-  const hours = document.getElementById('restaurant-hours');
+  const hoursTable = document.getElementById('restaurant-hours');
+  hoursTable.innerHTML = '';
 
   const head = document.createElement('thead');
-  hours.appendChild(head);
+  hoursTable.appendChild(head);
 
   const headRow = document.createElement('tr');
   head.appendChild(headRow);
@@ -118,7 +152,7 @@ function fillRestaurantHoursHTML(operatingHours = self.restaurant.operating_hour
     time.innerHTML = operatingHours[key];
     row.appendChild(time);
 
-    hours.appendChild(row);
+    hoursTable.appendChild(row);
   }
 }
 
@@ -126,10 +160,7 @@ function fillRestaurantHoursHTML(operatingHours = self.restaurant.operating_hour
  * Create all reviews HTML and add them to the webpage.
  */
 function fillReviewsHTML(reviews = self.restaurant.reviews) {
-  const container = document.getElementById('reviews-container');
-  const title = document.createElement('h2');
-  title.innerHTML = 'Reviews';
-  container.appendChild(title);
+  const container = document.getElementById('reviews-container');;
 
   if (!reviews) {
     const noReviews = document.createElement('p');
@@ -137,10 +168,9 @@ function fillReviewsHTML(reviews = self.restaurant.reviews) {
     container.appendChild(noReviews);
     return;
   }
+
   const ul = document.getElementById('reviews-list');
-  reviews.forEach(review => {
-    ul.appendChild(createReviewHTML(review));
-  });
+  reviews.forEach(review => ul.appendChild(createReviewHTML(review)));
   container.appendChild(ul);
 }
 

@@ -1,16 +1,26 @@
 #map {
   background-color: #ccc;
+  background-image: url('./../img/maps--all--narrow.png'); 
+  background-origin: center; 
+  background-position: center;
+  background-repeat: no-repeat;
   height: 400px;
   width: 100%;
 }
 
+@media screen and (min-width: 1024px) {
+  #map {
+    background-image: url('./../img/maps--all.png'); 
+  }
+}
+
 .inside #map {
+  background-image: url('./../img/maps--none--narrow.png'); 
   margin-top: 137px;
 }
 
 @media screen and (min-width: 1024px) {
   .inside #map-container {
-    background: blue none repeat scroll 0 0;
     height: calc(100% - 80px);
     position: fixed;
     right: 0;
@@ -19,7 +29,12 @@
   }
 
   .inside #map {
+    background-image: url('./../img/maps--none--full-height--narrow.png'); 
     height: 100%;
     margin: 0;
   }
+}
+
+@media screen and (min-width: 1950px) {
+    background-image: url('./../img/maps--none--full-height.png'); 
 }

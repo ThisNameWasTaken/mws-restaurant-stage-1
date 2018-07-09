@@ -35,8 +35,6 @@
 
 #restaurant-container,
 #reviews-container {
-  border-bottom: 1px solid #d9d9d9;
-  border-top: 1px solid #fff;
   padding: 16px;
   width: 100%;
 }
@@ -50,6 +48,7 @@
   padding-bottom: 1pt;
 }
 
+#add-review-card,
 #reviews-list li {
   background-color: #fff;
   border: 2px solid #f3f3f3;
@@ -113,4 +112,11 @@
   #restaurant-details {
     width: 50%;
   }
+}
+
+#add-review-button {
+  background: #d1481c;
+  color: #fff;
+  margin-left: auto;
+  display: block;
 }

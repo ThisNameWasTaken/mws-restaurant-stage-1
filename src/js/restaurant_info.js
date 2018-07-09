@@ -1,5 +1,6 @@
 import DBHelper from './dbhelper.js';
 import lazyImageObserver from './lazyImageObserver.js';
+import './textfields.js';
 
 self.restaurant;
 self.map;
@@ -10,6 +11,14 @@ fetchRestaurantFromURL((error, restaurant) => {
     console.error(error);
   } else {
     self.restaurant = restaurant;
+
+    // If the user has a good internet connection
+    if (navigator.connection &&
+      navigator.connection.effectiveType &&
+      !['3g', '2g', 'slow-2g'].includes(navigator.connection.effectiveType)) {
+      // Initialized the map
+      initMap()
+    }
     fillBreadcrumb();
   }
 });
@@ -40,15 +49,6 @@ window.initMap = () => {
   });
 
   DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
-}
-
-// If the user has a good internet connection
-if (
-  navigator.connection &&
-  navigator.connection.effectiveType &&
-  !['3g', '2g', 'slow-2g'].includes(navigator.connection.effectiveType)) {
-  // Initialized the map
-  window.addEventListener('load', initMap);
 }
 
 /**
@@ -117,7 +117,9 @@ function fillRestaurantHTML(restaurant = self.restaurant) {
     fillRestaurantHoursHTML();
   }
   // fill reviews
-  fillReviewsHTML();
+  fetch(`http://localhost:1337/reviews/?restaurant_id=${getParameterByName('id')}`)
+    .then(response => response.json())
+    .then(reviews => fillReviewsHTML(reviews));
 }
 
 /**
@@ -185,7 +187,7 @@ function createReviewHTML(review) {
   li.appendChild(name);
 
   const date = document.createElement('p');
-  date.innerHTML = review.date;
+  date.innerHTML = new Date(review.updatedAt).toDateString();
   li.appendChild(date);
 
   const rating = document.createElement('p');

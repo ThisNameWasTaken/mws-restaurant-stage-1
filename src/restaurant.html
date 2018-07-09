@@ -129,10 +129,35 @@
       <!-- Beginning reviews -->
       <section id="reviews-container">
         <h2>Reviews</h2>
-        <ul id="reviews-list">
-        </ul>
-      </section>
-      <!-- End reviews -->
+        <div class="card" id="add-review-card">
+          <div class="textfield">
+            <input id="name"
+                   class="textfield__input"
+                   name="name"
+                   type="text">
+            <label for="name"
+                   class="textfield__label">Name</label>
+            <div class="textfield__bottombar"></div>
+          </div>
+
+          <div class="textfield textfield--full-width">
+            <textarea id="review" 
+                      class="textfield__input"
+                      name="review"
+                      rows="6"
+                      required></textarea>
+            <label for="review"
+                   class="textfield__label">Review</label>
+            <div class="textfield__bottombar"></div>
+        </div>
+        <button id="add-review-button"
+                class="button"
+                type="submit">Add review</button>
+      </div>
+      <ul id="reviews-list">
+      </ul>
+    </section>
+    <!-- End reviews -->
     </div>
   </main>
   <!-- End main -->

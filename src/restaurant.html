@@ -130,29 +130,51 @@
       <section id="reviews-container">
         <h2>Reviews</h2>
         <div class="card" id="add-review-card">
-          <div class="textfield">
-            <input id="name"
-                   class="textfield__input"
-                   name="name"
-                   type="text">
-            <label for="name"
-                   class="textfield__label">Name</label>
-            <div class="textfield__bottombar"></div>
-          </div>
-
-          <div class="textfield textfield--full-width">
-            <textarea id="review" 
-                      class="textfield__input"
-                      name="review"
-                      rows="6"
-                      required></textarea>
-            <label for="review"
-                   class="textfield__label">Review</label>
-            <div class="textfield__bottombar"></div>
-        </div>
-        <button id="add-review-button"
-                class="button"
-                type="submit">Add review</button>
+          <form action="http://localhost:1337/reviews/" method="POST">
+            <input id="restaurant-id"
+                   type="number"
+                   value=""
+                   name="restaurant_id"
+                   hidden>
+            
+            <div class="textfield">
+              <input id="name"
+                     class="textfield__input"
+                     name="name"
+                     type="text">
+              <label for="name"
+                     class="textfield__label">Name</label>
+              <div class="textfield__bottombar"></div>
+            </div>
+            
+            <div class="textfield textfield--active">
+              <input id="rating"
+                     class="textfield__input"
+                     name="rating"
+                     type="number"
+                     value="5"
+                     min="1"
+                     max="5"
+                     required>
+              <label for="rating"
+                     class="textfield__label">Rating</label>
+              <div class="textfield__bottombar"></div>
+            </div>
+            
+            <div class="textfield textfield--full-width">
+              <textarea id="review"
+                        class="textfield__input"
+                        name="comments"
+                        rows="6"
+                        required></textarea>
+              <label for="comments"
+                     class="textfield__label">Review</label>
+              <div class="textfield__bottombar"></div>
+            </div>
+            <button id="add-review-button"
+                    class="button"
+                    type="submit">Add review</button>
+      </form>
       </div>
       <ul id="reviews-list">
       </ul>

@@ -117,9 +117,7 @@ function fillRestaurantHTML(restaurant = self.restaurant) {
     fillRestaurantHoursHTML();
   }
   // fill reviews
-  fetch(`http://localhost:1337/reviews/?restaurant_id=${getParameterByName('id')}`)
-    .then(response => response.json())
-    .then(reviews => fillReviewsHTML(reviews));
+  fillReviewsHTML();
 }
 
 /**

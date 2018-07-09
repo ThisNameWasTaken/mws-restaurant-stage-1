@@ -102,12 +102,28 @@ function filterByCuisine({ restaurants, cuisine }) {
 }
 
 function filterByID({ restaurants, id }) {
-    // Send back the restaurant with the given ID
-    self.postMessage({
-        type: 'filterByID',
-        // Find the restaurant with given ID
-        restaurant: restaurants.find(r => r.id == id)
-    });
+    // Find the restaurant with given ID
+    let restaurant = restaurants.find(r => r.id == id);
+
+    if (restaurant) {
+        // Get the reviews for the given restaurant
+        fetch(`http://localhost:1337/reviews/?restaurant_id=${id}`)
+            .then(response => response.json())
+            .then(reviews => {
+                restaurant.reviews = reviews;
+                // Send back the restaurant with the given ID
+                self.postMessage({
+                    type: 'filterByID',
+                    restaurant: restaurant
+                });
+            });
+    } else {
+        // Send back the restaurant with the given ID
+        self.postMessage({
+            type: 'filterByID',
+            restaurant: restaurant
+        });
+    }
 }
 
 function filterByCuisineAndNeighborhood({ restaurants, cuisine, neighborhood }) {

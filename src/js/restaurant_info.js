@@ -4,12 +4,20 @@ import lazyImageObserver from './lazyImageObserver.js';
 self.restaurant;
 self.map;
 
-
 fetchRestaurantFromURL((error, restaurant) => {
   if (error) { // Got an error!
     console.error(error);
   } else {
     self.restaurant = restaurant;
+
+    // If the user has a good internet connection
+    if (
+      navigator.connection &&
+      navigator.connection.effectiveType &&
+      !['3g', '2g', 'slow-2g'].includes(navigator.connection.effectiveType)) {
+      // Initialized the map
+      initMap()
+    }
     fillBreadcrumb();
   }
 });
@@ -40,15 +48,6 @@ window.initMap = () => {
   });
 
   DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
-}
-
-// If the user has a good internet connection
-if (
-  navigator.connection &&
-  navigator.connection.effectiveType &&
-  !['3g', '2g', 'slow-2g'].includes(navigator.connection.effectiveType)) {
-  // Initialized the map
-  window.addEventListener('load', initMap);
 }
 
 /**
@@ -116,8 +115,12 @@ function fillRestaurantHTML(restaurant = self.restaurant) {
   if (restaurant.operating_hours) {
     fillRestaurantHoursHTML();
   }
+
   // fill reviews
-  fillReviewsHTML();
+  const id = getParameterByName('id');
+  fetch(`http://localhost:1337/reviews/?restaurant_id=${id}`)
+    .then(response => response.json())
+    .then(reviews => fillReviewsHTML(reviews))
 }
 
 /**
@@ -159,7 +162,7 @@ function fillRestaurantHoursHTML(operatingHours = self.restaurant.operating_hour
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-function fillReviewsHTML(reviews = self.restaurant.reviews) {
+function fillReviewsHTML(reviews) {
   const container = document.getElementById('reviews-container');;
 
   if (!reviews) {

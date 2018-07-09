@@ -183,7 +183,7 @@ gulp.task('js', ['main', 'restaurant_info', 'sw', 'dbWorker']);
 
 // watch js files
 gulp.task('js:watch', () =>
-    gulp.watch('src/js/**/*.js', ['js'])
+    gulp.watch('src/**/*.js', ['js'])
         .on('change', browserSync.reload)
 );
 

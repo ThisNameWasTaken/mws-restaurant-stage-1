@@ -17,7 +17,7 @@ fetchRestaurantFromURL((error, restaurant) => {
       navigator.connection.effectiveType &&
       !['3g', '2g', 'slow-2g'].includes(navigator.connection.effectiveType)) {
       // Initialized the map
-      initMap()
+      initMap();
     }
     fillBreadcrumb();
   }
@@ -38,6 +38,10 @@ mapElement.addEventListener('click', function wakeMap() {
  * Initialize Google map, called from HTML.
  */
 window.initMap = () => {
+  if (!self.restaurant) {
+    return;
+  }
+
   isMapInitialized = true;
 
   self.map = new google.maps.Map(mapElement, {
@@ -50,6 +54,16 @@ window.initMap = () => {
 
   DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
 }
+
+window.addEventListener('load', function () {
+  // If the user has a good internet connection
+  if (navigator.connection &&
+    navigator.connection.effectiveType &&
+    !['3g', '2g', 'slow-2g'].includes(navigator.connection.effectiveType)) {
+    // Initialized the map
+    initMap();
+  }
+});
 
 /**
  * Get current restaurant from page URL.
@@ -116,6 +130,10 @@ function fillRestaurantHTML(restaurant = self.restaurant) {
   if (restaurant.operating_hours) {
     fillRestaurantHoursHTML();
   }
+
+  // set the restaurant_id for the review posting form
+  document.getElementById('restaurant-id').setAttribute('value', restaurant.id);
+
   // fill reviews
   fillReviewsHTML();
 }
@@ -181,7 +199,7 @@ function createReviewHTML(review) {
   const li = document.createElement('li');
   li.classList.add('card');
   const name = document.createElement('p');
-  name.innerHTML = review.name;
+  name.innerHTML = review.name !== '' ? review.name : 'Anonymous';
   li.appendChild(name);
 
   const date = document.createElement('p');

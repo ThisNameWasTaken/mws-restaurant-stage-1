@@ -92,10 +92,12 @@ let isMapInitialized = false;
 
 const mapElement = document.getElementById('map');
 mapElement.addEventListener('click', function wakeMap() {
-  if (!isMapInitialized) {
-    initMap();
+  if (isMapInitialized) {
+    mapElement.removeEventListener('click', wakeMap, false);
+    return;
   }
-  mapElement.removeEventListener('click', wakeMap, false);
+
+  window.initMap();
 });
 
 /**
@@ -244,13 +246,14 @@ function createRestaurantHTML(restaurant) {
  * Add markers for current restaurants to the map.
  */
 function addMarkersToMap(restaurants = self.restaurants) {
-  if (!isMapInitialized) {
+  if (!isMapInitialized || !restaurants) {
     return;
   }
 
   restaurants.forEach(restaurant => {
     // Add marker to the map
-    const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.map);
+    const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.map)
+
     google.maps.event.addListener(marker, 'click', () => {
       window.location.href = marker.url
     });

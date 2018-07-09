@@ -1,0 +1,26 @@
+.icon-button {
+    display: inline-block;
+    position: relative;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+}
+
+.icon-button * {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.favorite-icon--filled {
+    opacity: 1;
+}
+
+.button-icon--upgraded .favorite-icon--filled {
+    transition: opacity .2s ease;
+}
+
+input[value="false"]~.favorite-icon--filled {
+    opacity: 0;
+}

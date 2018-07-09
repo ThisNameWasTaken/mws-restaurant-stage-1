@@ -1,5 +1,7 @@
 import DBHelper from './dbhelper.js';
 import lazyImageObserver from './lazyImageObserver.js';
+import iconButton from './iconButton.js';
+import IconButton from './iconButton.js';
 
 self.restaurants;
 self.neighborhoods;
@@ -194,6 +196,8 @@ function createRestaurantHTML(restaurant) {
   image.classList.add('restaurant-img');
   image.classList.add('lazy');
 
+  image.width = "300px";
+
   const imageUrl = DBHelper.imageUrlForRestaurant(restaurant);
   image.dataset.src = imageUrl;
 
@@ -237,9 +241,38 @@ function createRestaurantHTML(restaurant) {
   more.innerHTML = 'View Details';
   more.href = DBHelper.urlForRestaurant(restaurant);
   more.setAttribute('aria-label', `view details about ${restaurant.name}`);
-  li.appendChild(more)
+  li.appendChild(more);
 
-  return li
+  const iconButton = document.createElement('form');
+  iconButton.action = `http://localhost:1337/restaurants/${restaurant.id}/`;
+  iconButton.method = 'POST';
+  iconButton.classList.add('icon-button');
+  li.appendChild(iconButton);
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.name = 'is_favorite';
+  input.setAttribute('value', 'false');
+  input.hidden = 'true';
+  iconButton.appendChild(input);
+
+  const favoriteIconOutlined = document.createElement('img');
+  favoriteIconOutlined.classList.add('favorite-icon--outlined');
+  favoriteIconOutlined.src = 'img/icon-favorite_border.svg';
+  favoriteIconOutlined.setAttribute('aria-hidden', 'true');
+  iconButton.appendChild(favoriteIconOutlined);
+
+  const favoriteIconFilled = document.createElement('img');
+  favoriteIconFilled.classList.add('favorite-icon--filled');
+  favoriteIconFilled.src = 'img/icon-favorite.svg';
+  favoriteIconFilled.setAttribute('aria-hidden', 'true');
+  iconButton.appendChild(favoriteIconFilled);
+
+  new IconButton(iconButton);
+
+  iconButton.addEventListener('click', iconButton.submit);
+
+  return li;
 }
 
 /**
@@ -260,3 +293,5 @@ function addMarkersToMap(restaurants = self.restaurants) {
     self.markers.push(marker);
   });
 }
+
+new IconButton(document.getElementById('test-icon-button'));

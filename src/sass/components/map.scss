@@ -36,5 +36,7 @@
 }
 
 @media screen and (min-width: 1950px) {
+  .inside #map {
     background-image: url('./../img/maps--none--full-height.png'); 
+  }
 }

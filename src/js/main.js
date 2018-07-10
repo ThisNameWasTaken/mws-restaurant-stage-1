@@ -269,7 +269,11 @@ function createRestaurantHTML(restaurant) {
   favoriteIconFilled.setAttribute('aria-hidden', 'true');
   iconButton.appendChild(favoriteIconFilled);
 
-  new IconButton(iconButton);
+  new IconButton(
+    iconButton,
+    `remove ${restaurant.name} from favorite restaurants`,
+    `add ${restaurant.name} to favorite restaurants`
+  );
 
   return li;
 }

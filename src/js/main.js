@@ -243,18 +243,19 @@ function createRestaurantHTML(restaurant) {
   more.setAttribute('aria-label', `view details about ${restaurant.name}`);
   li.appendChild(more);
 
-  const iconButton = document.createElement('form');
-  iconButton.action = `http://localhost:1337/restaurants/${restaurant.id}/`;
-  iconButton.method = 'POST';
+  const iconButton = document.createElement('button');
   iconButton.classList.add('icon-button');
+  iconButton.type = 'button';
+  if (restaurant.is_favorite) {
+    iconButton.classList.add('icon-button--active');
+  }
+  iconButton.addEventListener('click', function () {
+    fetch(
+      `http://localhost:1337/restaurants/${restaurant.id}/?is_favorite=${!restaurant.is_favorite}`,
+      { method: 'POST' }
+    )
+  });
   li.appendChild(iconButton);
-
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.name = 'is_favorite';
-  input.setAttribute('value', 'false');
-  input.hidden = 'true';
-  iconButton.appendChild(input);
 
   const favoriteIconOutlined = document.createElement('img');
   favoriteIconOutlined.classList.add('favorite-icon--outlined');
@@ -269,8 +270,6 @@ function createRestaurantHTML(restaurant) {
   iconButton.appendChild(favoriteIconFilled);
 
   new IconButton(iconButton);
-
-  iconButton.addEventListener('click', iconButton.submit);
 
   return li;
 }

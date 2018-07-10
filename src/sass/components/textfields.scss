@@ -68,7 +68,7 @@ textarea.textfield__input {
 .textfield__input:focus ~ .textfield__label,
 .textfield--active .textfield__label {
   font-size: .875rem;
-  transform: translateY(-1rem);
+  transform: translateY(-1.5rem);
 }
 
 .textfield__input:focus ~ .textfield__label {

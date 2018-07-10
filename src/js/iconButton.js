@@ -8,13 +8,8 @@ export default class IconButton {
         }
 
         this._element = element;
-        this._element.classList.add('button-icon--upgraded');
-        this._element.addEventListener('click', () => {
-            const input = this._element.firstElementChild;
-
-            input.getAttribute('value') == 'false' ?
-                input.setAttribute('value', 'true') :
-                input.setAttribute('value', 'false');
-        });
+        this._element.addEventListener('click', () =>
+            this._element.classList.toggle('icon-button--active')
+        );
     }
 };

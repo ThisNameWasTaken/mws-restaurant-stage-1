@@ -130,15 +130,9 @@
       <section id="reviews-container">
         <h2>Reviews</h2>
         <div class="card" id="add-review-card">
-          <form action="http://localhost:1337/reviews/" method="POST">
-            <input id="restaurant-id"
-                   type="number"
-                   value=""
-                   name="restaurant_id"
-                   hidden>
-            
+          <form id="reviews-form">
             <div class="textfield">
-              <input id="name"
+              <input id="reviewer-name"
                      class="textfield__input"
                      name="name"
                      type="text">
@@ -147,12 +141,11 @@
               <div class="textfield__bottombar"></div>
             </div>
             
-            <div class="textfield textfield--active">
-              <input id="rating"
+            <div class="textfield">
+              <input id="reviewer-rating"
                      class="textfield__input"
                      name="rating"
                      type="number"
-                     value="5"
                      min="1"
                      max="5"
                      required>

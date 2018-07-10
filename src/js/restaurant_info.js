@@ -131,8 +131,34 @@ function fillRestaurantHTML(restaurant = self.restaurant) {
     fillRestaurantHoursHTML();
   }
 
-  // set the restaurant_id for the review posting form
-  document.getElementById('restaurant-id').setAttribute('value', restaurant.id);
+
+  document.getElementById('reviews-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    let nameInput = document.getElementById('reviewer-name');
+    let ratingInput = document.getElementById('reviewer-rating');
+    let reviewInput = document.getElementById('review');
+    const review = {
+      restaurant_id: self.restaurant.id,
+      name: nameInput.value,
+      rating: ratingInput.value,
+      comments: reviewInput.value
+    }
+
+    fetch('http://localhost:1337/reviews/', {
+      method: 'POST',
+      body: JSON.stringify(review)
+    });
+
+    document.getElementById('reviews-list').appendChild(createReviewHTML(review));
+
+    nameInput.value = '';
+    nameInput.parentElement.classList.remove('textfield--active');
+    ratingInput.value = '';
+    ratingInput.parentElement.classList.remove('textfield--active');
+    reviewInput.value = '';
+    reviewInput.parentElement.classList.remove('textfield--active');
+  });
 
   // fill reviews
   fillReviewsHTML();

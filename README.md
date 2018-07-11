@@ -12,8 +12,16 @@ npm start
 
 ### Build for production
 ```sh
-npm build
+npm run build
 ```
+
+## Keep in mind while performing audits
+<p>While performing audits using ```npm start```, keep in mind that browserync injects javascript which leads to increasing the time for the consistently interactive time. </p>
+
+<p>You can however use the ```npm run sails-server``` and ```npm run python-server``` commands to run a [python](https://www.python.org/downloads/) server and perform audits this way, but, at least in my case, audits take longer to finish and sometimes even freeze, algthough it usually leads to significantly increased performance scores.</p>
+
+<p>For the second method you need to have [python](https://www.python.org/downloads/) installed.</p>
+
 _There are no other repositories which you have to clone for this project to work, just clone this project then run ```npm install``` and then ```npm start``` to run the development server._
 
 ---

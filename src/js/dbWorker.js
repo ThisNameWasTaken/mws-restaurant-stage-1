@@ -1,4 +1,4 @@
-import idb from './idb';
+import idb from 'idb';
 
 const idbPromise = idb.open('restaurant-reviews', 1, upgradeDB => {
     upgradeDB.createObjectStore('restaurants', { keyPath: 'id' });

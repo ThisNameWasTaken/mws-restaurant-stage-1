@@ -66,7 +66,9 @@
     <section id="map-container">
       <button id="map"
               role="application"
-              aria-label="map"></div>
+              aria-label="map">
+              <img src="img/marker.png" alt="" id="marker">
+            </div>
     </section>
     <!-- End map -->
 
@@ -136,7 +138,7 @@
                      class="textfield__input"
                      name="name"
                      type="text">
-              <label for="name"
+              <label for="reviewer-name"
                      class="textfield__label">Name</label>
               <div class="textfield__bottombar"></div>
             </div>
@@ -149,7 +151,7 @@
                      min="1"
                      max="5"
                      required>
-              <label for="rating"
+              <label for="reviewer-rating"
                      class="textfield__label">Rating</label>
               <div class="textfield__bottombar"></div>
             </div>
@@ -160,7 +162,7 @@
                         name="comments"
                         rows="6"
                         required></textarea>
-              <label for="comments"
+              <label for="review"
                      class="textfield__label">Review</label>
               <div class="textfield__bottombar"></div>
             </div>

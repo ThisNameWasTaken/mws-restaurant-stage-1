@@ -1,9 +1,7 @@
 export default (function () {
-    console.log('Hello textfields');
     'use strict';
 
     let inputs = document.getElementsByClassName('textfield__input');
-    console.log(inputs);
 
     for (let i = 0; i < inputs.length; i++) {
         inputs[i].addEventListener('focus', handleActiveState);
@@ -17,10 +15,8 @@ export default (function () {
 
     function handleActiveState() {
         if (this.value) {
-            console.log('NOT empty');
             this.parentElement.classList.add('textfield--active');
         } else {
-            console.log('empty');
             this.parentElement.classList.remove('textfield--active');
         }
     }

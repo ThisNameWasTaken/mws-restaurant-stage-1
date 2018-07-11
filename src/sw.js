@@ -70,3 +70,14 @@ self.addEventListener('activate', event =>
 self.addEventListener('message', event =>
     event.data.action == 'skipWaiting' ? self.skipWaiting() : null
 );
+
+// sync
+self.addEventListener('sync', function (event) {
+    if (event.tag.startsWith('post-review')) {
+        const review = event.tag.split('?')[1];
+        fetch('http://localhost:1337/reviews/', {
+            method: 'POST',
+            body: review
+        });
+    }
+});

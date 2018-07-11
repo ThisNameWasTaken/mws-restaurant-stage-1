@@ -157,11 +157,27 @@ document.getElementById('reviews-form').addEventListener('submit', function (eve
     return;
   }
 
-  // Post the review
-  fetch('http://localhost:1337/reviews/', {
-    method: 'POST',
-    body: JSON.stringify(review)
-  });
+  if ('serviceWorker' in navigator && 'SyncManager' in window) {
+    navigator.serviceWorker.ready.then(
+      registration => registration.sync.register(`post-review?${JSON.stringify(review)}`)
+    ).catch(
+      // system was unable to register for a sync,
+      // this could be an OS-level restriction
+      postReview
+    );
+  } else {
+    // serviceworker/sync not supported
+    postReview();
+  }
+
+  function postReview() {
+    // Post the review
+    fetch('http://localhost:1337/reviews/', {
+      method: 'POST',
+      body: JSON.stringify(review)
+    });
+  }
+
 
   // Add the review to the DOM
   document.getElementById('reviews-list').appendChild(createReviewHTML(review));
@@ -169,8 +185,6 @@ document.getElementById('reviews-form').addEventListener('submit', function (eve
   // Update idb
   self.restaurant.reviews.push(review);
   idbPromise.then(db => db.transaction('restaurants', 'readwrite').objectStore('restaurants').put(self.restaurant));
-  idbPromise.then(db => db.transaction('restaurants', 'readwrite').objectStore('restaurants').get(self.restaurant.id))
-    .then(restaurant => console.log(restaurant));
 
   // Reset the form
   nameInput.value = '';

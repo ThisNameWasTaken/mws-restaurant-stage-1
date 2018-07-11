@@ -6,7 +6,9 @@
   "scripts": {
     "install": "cd server && npm install",
     "build": "gulp build",
-    "start": "cd server | node server | cd .. | gulp watch"
+    "start": "cd server | node server | cd .. | gulp watch",
+    "python-server": "npm run build & cd dist & python -m http.server 8000",
+    "sails-server": "cd server & node server"
   },
   "author": "Adrian Dinca",
   "license": "MIT",

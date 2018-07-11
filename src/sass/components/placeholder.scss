@@ -22,3 +22,21 @@ h3.placeholder {
     height: 1.15rem;
     width: 62%;
 }
+
+#restaurant-cuisine .placeholder {
+    max-width: 250px;
+    width: 100%;
+    display: inline-block;
+    margin: auto;
+    color: #fff;
+    opacity: .7;
+    margin-top: 8px;
+}
+
+#restaurant-name .placeholder {
+    height: 1.2rem;
+    line-height: 1.2rem;
+    opacity: .7;
+    width: 180px;
+    max-width: 100%;
+}

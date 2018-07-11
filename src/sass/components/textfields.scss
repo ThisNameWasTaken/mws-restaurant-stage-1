@@ -1,0 +1,126 @@
+$danger: #ff4433;
+$primary: #d1481c;
+
+.textfield {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  margin-top: 1rem;
+  margin-bottom: .5rem;
+  position: relative;
+}
+
+.textfield__input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+  color: rgba(0, 0, 0, 0.87);
+  font-size: 1rem;
+  outline: none;
+  padding-top: .5rem;
+  padding-bottom: .5rem;
+  width: 230px;
+  min-width: 7rem;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.textfield--full-width,
+.textfield--full-width .textfield__input {
+  width: 100%;
+}
+
+textarea.textfield__input {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.textfield__bottombar {
+  background: $primary;
+  bottom: 0;
+  height: 2px;
+  left: 50%;
+  position: absolute;
+  width: 100%;
+  -webkit-transform: translateX(-50%) scaleX(0);
+  -ms-transform: translateX(-50%) scaleX(0);
+  transform: translateX(-50%) scaleX(0);
+}
+
+.textfield__input:focus ~ .textfield__bottombar {
+  -webkit-transform: translateX(-50%) scaleX(1);
+  -ms-transform: translateX(-50%) scaleX(1);
+  transform: translateX(-50%) scaleX(1);
+}
+
+.textfield__label {
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 1rem;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  top: .5rem;
+}
+
+.textfield__input:focus ~ .textfield__label,
+.textfield--active .textfield__label {
+  font-size: .875rem;
+  transform: translateY(-1.5rem);
+}
+
+.textfield__input:focus ~ .textfield__label {
+  color: $primary;
+}
+
+.textfield__input:required ~ .textfield__label::after {
+  content: '*';
+}
+
+.textfield__input:required:focus ~ .textfield__label::after {
+  color: $danger;
+}
+
+.textfield__bottombar,
+.textfield__label {
+  -webkit-transition: 0.24s cubic-bezier(0, 0, 0.2, 1);
+  -o-transition: 0.24s cubic-bezier(0, 0, 0.2, 1);
+  transition: 0.24s cubic-bezier(0, 0, 0.2, 1);
+}
+
+.textfield--danger {
+    animation: shake .5s ease-in-out;
+}
+
+.textfield--danger .textfield__label,
+.textfield--danger .textfield-helper-text {
+  color: $danger;
+}
+
+.textfield--danger .textfield__input {
+  border-bottom: 1px solid $danger;
+}
+
+.textfield--danger .textfield__bottombar {
+  background: $danger;
+}
+
+@keyframes shake {
+    10%, 90% {
+        transform: translate3d(-1px, 0, 0);
+    }
+
+    20%, 80% {
+        transform: translate3d(2px, 0, 0);
+    }
+
+    30%, 50%, 70% {
+        transform: translate3d(-4px, 0, 0);
+    }
+
+    40%, 60% {
+        transform: translate3d(4px, 0, 0);
+    }
+}

@@ -50,8 +50,7 @@
       <h1><a href="/">Restaurant Reviews</a></h1>
     </nav>
     <!-- Beginning breadcrumb -->
-    <nav role="breadcrumb"
-         aria-label="breadcrumb">
+    <nav aria-label="Breadcrumb">
       <ul id="breadcrumb">
         <li><a href="/">Home</a></li>
       </ul>
@@ -67,29 +66,115 @@
     <section id="map-container">
       <button id="map"
               role="application"
-              aria-label="map"></div>
+              aria-label="map">
+              <img src="img/marker.png" alt="" id="marker">
+            </div>
     </section>
     <!-- End map -->
 
     <div id="restaurant-details">
       <!-- Beginning restaurant -->
       <section id="restaurant-container">
-        <h2 id="restaurant-name"></h2>
+        <h2 id="restaurant-name">
+          <div class="placeholder"></div>
+        </h2>
         <div class="card">
-          <img id="restaurant-img">
-          <p id="restaurant-cuisine"></p>
+          <img id="restaurant-img"
+               class="restaurant-img lazy"
+               src="img/placeholder.svg"
+               sizes="(min-width: 1024px) 50vw, 100vw">
+          <p id="restaurant-cuisine">
+            <span class="placeholder"></span>
+          </p>
         </div>
-        <p id="restaurant-address"></p>
+        <p id="restaurant-address">
+          <span class="placeholder"></span>
+        </p>
         <h2 id="restaurant-schedule">Schedule</h2>
         <table id="restaurant-hours"
-               class="card"></table>
+               class="card">
+          <tr>
+            <td><div class="placeholder"></div></td>
+            <td><div class="placeholder"></div></td>
+          </tr>
+          <tr>
+            <td><div class="placeholder"></div></td>
+            <td><div class="placeholder"></div></td>
+          </tr>
+          <tr>
+            <td><div class="placeholder"></div></td>
+            <td><div class="placeholder"></div></td>
+          </tr>
+          <tr>
+            <td><div class="placeholder"></div></td>
+            <td><div class="placeholder"></div></td>
+          </tr>
+          <tr>
+            <td><div class="placeholder"></div></td>
+            <td><div class="placeholder"></div></td>
+          </tr>
+          <tr>
+            <td><div class="placeholder"></div></td>
+            <td><div class="placeholder"></div></td>
+          </tr>
+          <tr>
+            <td><div class="placeholder"></div></td>
+            <td><div class="placeholder"></div></td>
+          </tr>
+          <tr>
+            <td><div class="placeholder"></div></td>
+            <td><div class="placeholder"></div></td>
+          </tr>
+      </table>
       </section>
       <!-- end restaurant -->
       <!-- Beginning reviews -->
       <section id="reviews-container">
-        <ul id="reviews-list"></ul>
-      </section>
-      <!-- End reviews -->
+        <h2>Reviews</h2>
+        <div class="card" id="add-review-card">
+          <form id="reviews-form">
+            <div class="textfield">
+              <input id="reviewer-name"
+                     class="textfield__input"
+                     name="name"
+                     type="text">
+              <label for="reviewer-name"
+                     class="textfield__label">Name</label>
+              <div class="textfield__bottombar"></div>
+            </div>
+            
+            <div class="textfield">
+              <input id="reviewer-rating"
+                     class="textfield__input"
+                     name="rating"
+                     type="number"
+                     min="1"
+                     max="5"
+                     required>
+              <label for="reviewer-rating"
+                     class="textfield__label">Rating</label>
+              <div class="textfield__bottombar"></div>
+            </div>
+            
+            <div class="textfield textfield--full-width">
+              <textarea id="review"
+                        class="textfield__input"
+                        name="comments"
+                        rows="6"
+                        required></textarea>
+              <label for="review"
+                     class="textfield__label">Review</label>
+              <div class="textfield__bottombar"></div>
+            </div>
+            <button id="add-review-button"
+                    class="button"
+                    type="submit">Add review</button>
+      </form>
+      </div>
+      <ul id="reviews-list">
+      </ul>
+    </section>
+    <!-- End reviews -->
     </div>
   </main>
   <!-- End main -->
@@ -107,7 +192,7 @@
   <!-- Google Maps -->
   <script async
           defer
-          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCz-NSzy5kH2MTJOy0rGDWgrYbTHxrqkzg&libraries=places&callback=initMap"></script>
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCz-NSzy5kH2MTJOy0rGDWgrYbTHxrqkzg&libraries=places"></script>
   <!-- End scripts -->
 
 </body>

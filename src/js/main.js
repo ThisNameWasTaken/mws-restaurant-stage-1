@@ -1,29 +1,18 @@
 import DBHelper from './dbhelper.js';
-import 'intersection-observer';
+import lazyImageObserver from './lazyImageObserver.js';
+import IconButton from './iconButton.js';
+import { isMapInitialized, isSlowConnection } from './utils.js';
 
-let restaurants;
-let neighborhoods;
-let cuisines;
-let map;
+self.restaurants;
+self.neighborhoods;
+self.cuisines;
+self.map;
 self.markers = [];
 
-let lazyImageObserver;
+const cuisinesSelect = document.getElementById('cuisines-select')
+const neighborhoodsSelect = document.getElementById('neighborhoods-select');
 
-/**
- * Lazy load offscreen images
- */
-if ("IntersectionObserver" in window) {
-  lazyImageObserver = new IntersectionObserver(function (entries, observer) {
-    entries.forEach(function (entry) {
-      if (entry.isIntersecting) {
-        let lazyImage = entry.target;
-        lazyImage.src = lazyImage.dataset.src;
-        lazyImage.srcset = lazyImage.dataset.srcset;
-        lazyImageObserver.unobserve(lazyImage);
-      }
-    });
-  });
-}
+const restaurantsList = document.getElementById('restaurants-list');
 
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
@@ -101,6 +90,15 @@ function fillCuisinesHTML(cuisines = self.cuisines) {
   });
 }
 
+const mapElement = document.getElementById('map');
+mapElement.addEventListener('click', function wakeMap() {
+  if (isMapInitialized()) {
+    mapElement.removeEventListener('click', wakeMap, false);
+  } else {
+    window.initMap();
+  }
+});
+
 /**
  * Initialize Google map, called from HTML.
  */
@@ -109,28 +107,40 @@ window.initMap = function () {
     lat: 40.722216,
     lng: -73.987501
   };
-  self.map = new google.maps.Map(document.getElementById('map'), {
+
+  self.map = new google.maps.Map(mapElement, {
     zoom: 12,
     center: loc,
     scrollwheel: false,
     mapTypeControl: false,
     streetViewControl: false
   });
-  updateRestaurants();
+
+  // Add the markers to the map
+  addMarkersToMap(self.restaurants);
+}
+
+updateRestaurants();
+
+// If the user has a good internet connection
+if (!isSlowConnection()) {
+  // Initialized the map
+  window.addEventListener('load', initMap);
 }
 
 /**
  * Update page and map for current restaurants.
  */
 function updateRestaurants() {
-  const cSelect = document.getElementById('cuisines-select');
-  const nSelect = document.getElementById('neighborhoods-select');
+  const cIndex = cuisinesSelect.selectedIndex;
+  const nIndex = neighborhoodsSelect.selectedIndex;
 
-  const cIndex = cSelect.selectedIndex;
-  const nIndex = nSelect.selectedIndex;
+  const cuisine = cuisinesSelect[cIndex].value;
+  const neighborhood = neighborhoodsSelect[nIndex].value;
 
-  const cuisine = cSelect[cIndex].value;
-  const neighborhood = nSelect[nIndex].value;
+  if (!isMapInitialized() && (cuisine != 'all' || neighborhood != 'all')) {
+    initMap();
+  }
 
   DBHelper.fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, (error, restaurants) => {
     if (error) { // Got an error!
@@ -142,8 +152,8 @@ function updateRestaurants() {
   })
 }
 
-document.getElementById('cuisines-select').addEventListener('change', updateRestaurants);
-document.getElementById('neighborhoods-select').addEventListener('change', updateRestaurants);
+cuisinesSelect.addEventListener('change', updateRestaurants);
+neighborhoodsSelect.addEventListener('change', updateRestaurants);
 
 /**
  * Clear current restaurants, their HTML and remove their map markers.
@@ -151,8 +161,7 @@ document.getElementById('neighborhoods-select').addEventListener('change', updat
 function resetRestaurants(restaurants) {
   // Remove all restaurants
   self.restaurants = [];
-  const ul = document.getElementById('restaurants-list');
-  ul.innerHTML = '';
+  restaurantsList.innerHTML = '';
 
   // Remove all map markers
   self.markers.forEach(m => m.setMap(null));
@@ -164,8 +173,7 @@ function resetRestaurants(restaurants) {
  * Create all restaurants HTML and add them to the webpage.
  */
 function fillRestaurantsHTML(restaurants = self.restaurants) {
-  const ul = document.getElementById('restaurants-list');
-  restaurants.forEach(restaurant => ul.appendChild(createRestaurantHTML(restaurant)));
+  restaurants.forEach(restaurant => restaurantsList.appendChild(createRestaurantHTML(restaurant)));
   addMarkersToMap();
 }
 
@@ -179,6 +187,8 @@ function createRestaurantHTML(restaurant) {
   const image = document.createElement('img');
   image.classList.add('restaurant-img');
   image.classList.add('lazy');
+
+  image.width = "300px";
 
   const imageUrl = DBHelper.imageUrlForRestaurant(restaurant);
   image.dataset.src = imageUrl;
@@ -200,8 +210,9 @@ function createRestaurantHTML(restaurant) {
 
   image.alt = `A view from the restaurant ${restaurant.name}`;
 
-  if (lazyImageObserver)
+  if (lazyImageObserver) {
     lazyImageObserver.observe(image);
+  }
 
   li.appendChild(image);
 
@@ -222,21 +233,60 @@ function createRestaurantHTML(restaurant) {
   more.innerHTML = 'View Details';
   more.href = DBHelper.urlForRestaurant(restaurant);
   more.setAttribute('aria-label', `view details about ${restaurant.name}`);
-  li.appendChild(more)
+  li.appendChild(more);
 
-  return li
+  const iconButton = document.createElement('button');
+  iconButton.classList.add('icon-button');
+  iconButton.type = 'button';
+  if (restaurant.is_favorite) {
+    iconButton.classList.add('icon-button--active');
+  }
+  iconButton.addEventListener('click', function () {
+    fetch(
+      `http://localhost:1337/restaurants/${restaurant.id}/?is_favorite=${!restaurant.is_favorite}`,
+      { method: 'POST' }
+    )
+  });
+  li.appendChild(iconButton);
+
+  const favoriteIconOutlined = document.createElement('img');
+  favoriteIconOutlined.classList.add('favorite-icon--outlined');
+  favoriteIconOutlined.src = 'img/icon-favorite_border.svg';
+  favoriteIconOutlined.setAttribute('aria-hidden', 'true');
+  iconButton.appendChild(favoriteIconOutlined);
+
+  const favoriteIconFilled = document.createElement('img');
+  favoriteIconFilled.classList.add('favorite-icon--filled');
+  favoriteIconFilled.src = 'img/icon-favorite.svg';
+  favoriteIconFilled.setAttribute('aria-hidden', 'true');
+  iconButton.appendChild(favoriteIconFilled);
+
+  new IconButton(
+    iconButton,
+    `remove ${restaurant.name} from favorite restaurants`,
+    `add ${restaurant.name} to favorite restaurants`
+  );
+
+  return li;
 }
 
 /**
  * Add markers for current restaurants to the map.
  */
 function addMarkersToMap(restaurants = self.restaurants) {
+  if (!isMapInitialized() || !restaurants) {
+    return;
+  }
+
   restaurants.forEach(restaurant => {
     // Add marker to the map
-    const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.map);
+    const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.map)
+
     google.maps.event.addListener(marker, 'click', () => {
       window.location.href = marker.url
     });
     self.markers.push(marker);
   });
 }
+
+new IconButton(document.getElementById('test-icon-button'));

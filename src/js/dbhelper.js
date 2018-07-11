@@ -4,8 +4,6 @@ const idbPromise = idb.open('restaurant-reviews', 1, upgradeDB => {
   upgradeDB.createObjectStore('restaurants', { keyPath: 'id' });
 });
 
-// export idbPromise
-
 const dbWorker = new Worker('/js/dbWorker.js');
 
 /**

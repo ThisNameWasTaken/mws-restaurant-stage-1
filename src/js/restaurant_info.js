@@ -2,6 +2,11 @@ import DBHelper from './dbhelper.js';
 import lazyImageObserver from './lazyImageObserver.js';
 import './textfields.js';
 import { isMapInitialized, isSlowConnection } from './utils.js';
+import idb from 'idb';
+
+const idbPromise = idb.open('restaurant-reviews', 1, upgradeDB => {
+  upgradeDB.createObjectStore('restaurants', { keyPath: 'id' });
+});
 
 self.restaurant;
 self.map;
@@ -129,40 +134,52 @@ function fillRestaurantHTML(restaurant = self.restaurant) {
     fillRestaurantHoursHTML();
   }
 
-
-  document.getElementById('reviews-form').addEventListener('submit', function (event) {
-    event.preventDefault();
-
-    let nameInput = document.getElementById('reviewer-name');
-    let ratingInput = document.getElementById('reviewer-rating');
-    let reviewInput = document.getElementById('review');
-    const review = {
-      restaurant_id: self.restaurant.id,
-      name: nameInput.value,
-      rating: ratingInput.value,
-      comments: reviewInput.value
-    }
-
-    fetch('http://localhost:1337/reviews/', {
-      method: 'POST',
-      body: JSON.stringify(review)
-    });
-
-    document.getElementById('reviews-list').appendChild(createReviewHTML(review));
-    // self.restaurant.reviews.push(review);
-    // idbPromise.then(db => db.transaction('restaurants', 'readwrite').objectStore('restaurants').put(self.restaurant));
-
-    nameInput.value = '';
-    nameInput.parentElement.classList.remove('textfield--active');
-    ratingInput.value = '';
-    ratingInput.parentElement.classList.remove('textfield--active');
-    reviewInput.value = '';
-    reviewInput.parentElement.classList.remove('textfield--active');
-  });
-
   // fill reviews
   fillReviewsHTML();
 }
+
+document.getElementById('reviews-form').addEventListener('submit', function (event) {
+  event.preventDefault();
+
+  let nameInput = document.getElementById('reviewer-name');
+  let ratingInput = document.getElementById('reviewer-rating');
+  let reviewInput = document.getElementById('review');
+
+  const review = {
+    restaurant_id: self.restaurant.id,
+    name: nameInput.value,
+    rating: ratingInput.value,
+    comments: reviewInput.value,
+    updatedAt: new Date()
+  }
+
+  if (!review.rating || !review.comments) {
+    return;
+  }
+
+  // Post the review
+  fetch('http://localhost:1337/reviews/', {
+    method: 'POST',
+    body: JSON.stringify(review)
+  });
+
+  // Add the review to the DOM
+  document.getElementById('reviews-list').appendChild(createReviewHTML(review));
+
+  // Update idb
+  self.restaurant.reviews.push(review);
+  idbPromise.then(db => db.transaction('restaurants', 'readwrite').objectStore('restaurants').put(self.restaurant));
+  idbPromise.then(db => db.transaction('restaurants', 'readwrite').objectStore('restaurants').get(self.restaurant.id))
+    .then(restaurant => console.log(restaurant));
+
+  // Reset the form
+  nameInput.value = '';
+  nameInput.parentElement.classList.remove('textfield--active');
+  ratingInput.value = '';
+  ratingInput.parentElement.classList.remove('textfield--active');
+  reviewInput.value = '';
+  reviewInput.parentElement.classList.remove('textfield--active');
+});
 
 /**
  * Create restaurant operating hours HTML table and add it to the webpage.

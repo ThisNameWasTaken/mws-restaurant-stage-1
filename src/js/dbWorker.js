@@ -1,6 +1,8 @@
 import idb from './idb';
 
-const idbPromise = idb.open('restaurant-reviews', 1, upgradeDb => upgradeDb.createObjectStore('restaurant-data', { keyPath: 'id' }));
+const idbPromise = idb.open('restaurant-reviews', 1, upgradeDB => {
+    upgradeDB.createObjectStore('restaurants', { keyPath: 'id' });
+});
 
 self.onmessage = function (event) {
     const message = event.data;
@@ -55,14 +57,15 @@ self.onmessage = function (event) {
 function updateIDB(responseText) {
     const restaurants = JSON.parse(responseText);
 
-    if (!restaurants) {
-        return;
-    }
+    // Send back the restaurants
+    self.postMessage({ type: 'updateIDB', restaurants: restaurants });
 
-    restaurants.forEach(restaurant =>
-        idbPromise.then(db =>
-            db.transaction('restaurant-data', 'readwrite').objectStore('restaurant-data').put(restaurant))
-    );
+    // Cache the restaurants
+    for (const restaurant of restaurants) {
+        idbPromise.then(
+            db => db.transaction('restaurants', 'readwrite').objectStore('restaurants').put(restaurant)
+        );
+    }
 }
 
 function fetchCuisines(restaurants) {

@@ -1,17 +1,10 @@
 import idb from './idb';
 
-/**
-  * @returns a promise for the database
-  */
-function getIdbPromise() {
-  if (!navigator.serviceWorker) {
-    return Promise.reject();
-  }
+const idbPromise = idb.open('restaurant-reviews', 1, upgradeDB => {
+  upgradeDB.createObjectStore('restaurants', { keyPath: 'id' });
+});
 
-  return idb.open('restaurant-reviews', 1, upgradeDb => upgradeDb.createObjectStore('restaurant-data', { keyPath: 'id' }));
-}
-
-const idbPromise = getIdbPromise();
+// export idbPromise
 
 const dbWorker = new Worker('/js/dbWorker.js');
 
@@ -34,7 +27,7 @@ export default class DBHelper {
    */
   static fetchRestaurants(callback) {
     idbPromise
-      .then(db => db.transaction('restaurant-data').objectStore('restaurant-data').getAll())
+      .then(db => db.transaction('restaurants', 'readwrite').objectStore('restaurants').getAll())
       .then(restaurants => callback(null, restaurants));
 
     let xhr = new XMLHttpRequest();
@@ -42,6 +35,17 @@ export default class DBHelper {
     xhr.onload = () => {
       if (xhr.status === 200) { // Got a success response from server!
         dbWorker.postMessage({ type: 'updateIDB', responseText: xhr.responseText });
+
+        dbWorker.addEventListener('message', function (event) {
+          const message = event.data;
+          if (message.type == 'updateIDB') {
+            if (message.restaurants) { // Got the restaurant
+              callback(null, message.restaurants);
+            } else { // Restaurant does not exist in the database
+              callback('Restaurants do not exist', null);
+            }
+          }
+        })
       } else { // Oops!. Got an error from server.
         const error = (`Request failed. Returned status of ${xhr.status}`);
         callback(error, null);

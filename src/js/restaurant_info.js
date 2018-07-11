@@ -1,6 +1,7 @@
 import DBHelper from './dbhelper.js';
 import lazyImageObserver from './lazyImageObserver.js';
 import './textfields.js';
+import { isMapInitialized, isSlowConnection } from './utils.js';
 
 self.restaurant;
 self.map;
@@ -23,26 +24,27 @@ fetchRestaurantFromURL((error, restaurant) => {
   }
 });
 
-let isMapInitialized;
-
 const mapElement = document.getElementById('map');
 
 mapElement.addEventListener('click', function wakeMap() {
-  if (!isMapInitialized) {
-    initMap();
+  if (isMapInitialized()) {
+    mapElement.removeEventListener('click', wakeMap, false);
+  } else {
+    window.initMap();
   }
-  mapElement.removeEventListener('click', wakeMap, false);
 });
 
 /**
  * Initialize Google map, called from HTML.
  */
 window.initMap = () => {
-  if (!self.restaurant) {
+  if (typeof google === 'undefined') {
     return;
   }
 
-  isMapInitialized = true;
+  if (!self.restaurant) {
+    return;
+  }
 
   self.map = new google.maps.Map(mapElement, {
     zoom: 16,
@@ -55,15 +57,11 @@ window.initMap = () => {
   DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
 }
 
-window.addEventListener('load', function () {
-  // If the user has a good internet connection
-  if (navigator.connection &&
-    navigator.connection.effectiveType &&
-    !['3g', '2g', 'slow-2g'].includes(navigator.connection.effectiveType)) {
-    // Initialized the map
-    initMap();
-  }
-});
+// If the user has a good internet connection
+if (!isSlowConnection()) {
+  // Initialized the map
+  window.addEventListener('load', initMap);
+}
 
 /**
  * Get current restaurant from page URL.
@@ -151,6 +149,8 @@ function fillRestaurantHTML(restaurant = self.restaurant) {
     });
 
     document.getElementById('reviews-list').appendChild(createReviewHTML(review));
+    // self.restaurant.reviews.push(review);
+    // idbPromise.then(db => db.transaction('restaurants', 'readwrite').objectStore('restaurants').put(self.restaurant));
 
     nameInput.value = '';
     nameInput.parentElement.classList.remove('textfield--active');
@@ -214,6 +214,7 @@ function fillReviewsHTML(reviews = self.restaurant.reviews) {
   }
 
   const ul = document.getElementById('reviews-list');
+  ul.innerHTML = '';
   reviews.forEach(review => ul.appendChild(createReviewHTML(review)));
   container.appendChild(ul);
 }
@@ -248,6 +249,13 @@ function createReviewHTML(review) {
  */
 function fillBreadcrumb(restaurant = self.restaurant) {
   const breadcrumb = document.getElementById('breadcrumb');
+  const previousCurrentPageListElement = breadcrumb.querySelector('*[aria-current="page"]');
+
+  // If the current page is already added
+  if (previousCurrentPageListElement && previousCurrentPageListElement.innerHTML == restaurant.name) {
+    return; // Exit
+  }
+
   const li = document.createElement('li');
   li.innerHTML = restaurant.name;
   li.setAttribute('aria-current', 'page');

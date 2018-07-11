@@ -1,7 +1,7 @@
 import DBHelper from './dbhelper.js';
 import lazyImageObserver from './lazyImageObserver.js';
-import iconButton from './iconButton.js';
 import IconButton from './iconButton.js';
+import { isMapInitialized, isSlowConnection } from './utils.js';
 
 self.restaurants;
 self.neighborhoods;
@@ -90,24 +90,19 @@ function fillCuisinesHTML(cuisines = self.cuisines) {
   });
 }
 
-let isMapInitialized = false;
-
 const mapElement = document.getElementById('map');
 mapElement.addEventListener('click', function wakeMap() {
-  if (isMapInitialized) {
+  if (isMapInitialized()) {
     mapElement.removeEventListener('click', wakeMap, false);
-    return;
+  } else {
+    window.initMap();
   }
-
-  window.initMap();
 });
 
 /**
  * Initialize Google map, called from HTML.
  */
 window.initMap = function () {
-  isMapInitialized = true;
-
   let loc = {
     lat: 40.722216,
     lng: -73.987501
@@ -128,10 +123,7 @@ window.initMap = function () {
 updateRestaurants();
 
 // If the user has a good internet connection
-if (
-  navigator.connection &&
-  navigator.connection.effectiveType &&
-  !['3g', '2g', 'slow-2g'].includes(navigator.connection.effectiveType)) {
+if (!isSlowConnection()) {
   // Initialized the map
   window.addEventListener('load', initMap);
 }
@@ -146,7 +138,7 @@ function updateRestaurants() {
   const cuisine = cuisinesSelect[cIndex].value;
   const neighborhood = neighborhoodsSelect[nIndex].value;
 
-  if (!isMapInitialized && (cuisine != 'all' || neighborhood != 'all')) {
+  if (!isMapInitialized() && (cuisine != 'all' || neighborhood != 'all')) {
     initMap();
   }
 
@@ -282,7 +274,7 @@ function createRestaurantHTML(restaurant) {
  * Add markers for current restaurants to the map.
  */
 function addMarkersToMap(restaurants = self.restaurants) {
-  if (!isMapInitialized || !restaurants) {
+  if (!isMapInitialized() || !restaurants) {
     return;
   }
 

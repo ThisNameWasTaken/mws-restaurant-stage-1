@@ -74,7 +74,8 @@ self.addEventListener('message', event =>
 // sync
 self.addEventListener('sync', function (event) {
     if (event.tag.startsWith('post-review')) {
-        const review = event.tag.split('?')[1];
+        const reviewSplits = event.tag.split('?');
+        const review = reviewSplits.slice(1, reviewSplits.length).join('?');
         fetch('http://localhost:1337/reviews/', {
             method: 'POST',
             body: review
